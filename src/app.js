@@ -21,6 +21,10 @@ app.use(bodyParser.urlencoded({
     parameterLimit: 10000000000 
 }));
 
+app.get('/status', (req, res) => {
+  res.send('Servidor corriendo correctamente ✅');
+});
+
 // Routes
 app.use(require('./routes/excel.routes'));
 app.use(require('./routes/image.routes'));

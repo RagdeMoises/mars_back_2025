@@ -12,18 +12,10 @@ app.set('view engine', 'ejs');
 
 // Middleware
 //app.use(cors());
-const allowedOrigins = ['https://upload2025-production.up.railway.app'];
-
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true
+  origin: 'https://upload2025-production.up.railway.app'
 }));
+
 app.use(express.json());
 app.use("/images", express.static('public/uploads'));
 app.use(bodyParser.json({ limit: '50mb' }));

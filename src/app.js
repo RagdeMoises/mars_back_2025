@@ -12,8 +12,26 @@ app.set('view engine', 'ejs');
 
 // Middleware
 //app.use(cors());
+//app.use(cors({
+  //origin: 'https://upload2025-production.up.railway.app'
+//}));
+
+const allowedOrigins = [
+  'https://upload2025-production.up.railway.app',
+  'https://frontmayor2025-production.up.railway.app'
+];
+
 app.use(cors({
-  origin: 'https://upload2025-production.up.railway.app'
+  origin: function (origin, callback) {
+    // Permitir solicitudes sin 'origin' (como apps móviles o curl)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Origen no permitido por CORS'));
+    }
+  }
 }));
 
 app.use(express.json());

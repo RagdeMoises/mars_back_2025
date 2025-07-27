@@ -234,7 +234,8 @@ const enviarCorreo = async (req, res) => {
   const mailOptions = {
     from: "edgararc13@gmail.com",
     to: email,
-    cc: 'coop.mars@outlook.com', // destinatario en copia
+    //cc: 'coop.mars@outlook.com', // destinatario en copia
+    cc: ['coop.mars@outlook.com', 'rivero_ragde@hotmail.com', 'santanaadri@hotmail.com'],
     subject: 'Tiendas MARS- Tu carrito de pedidos',
     text: 'Buen dia adjunto encontrarás los productos de tu pedido, gracias por preferirnos, Tiendas MARS',
     attachments: [{

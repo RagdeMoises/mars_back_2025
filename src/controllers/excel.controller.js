@@ -18,7 +18,8 @@ const readExcelFile = async (filePath) => {
                          'Q', 'categoria', 'S', 'proveedor', 'U', 'V', 'W', 'X', 'Y', 'Z', 'AA', 
                          'AB', 'AC', 'AD', 'AE', 'ubicacion', 'AG', 'AH', 'AI']
             });
-        temp.forEach((res) => {            
+        temp.forEach((res) => {  
+            console.log(res)          
             data.push(res);
         });
         return data;
@@ -210,7 +211,7 @@ function getSortClause(sortBy) {
 
 
 const enviarCorreo = async (req, res) => {
-  const { email, cartItems } = req.body;
+  const { email, clientName, clientPhone, observations, cartItems } = req.body;
   //console.log(req.body)
 
   // Generar Excel
@@ -231,13 +232,30 @@ const enviarCorreo = async (req, res) => {
     },
   });
 
+  // Construir subject y text basado en los datos proporcionados
+  let subject = 'MARS- Tu carrito de pedidos';
+  let text = 'Adjunto encontrarás los productos de tu carrito';
+  
+  // Agregar nombre y teléfono al subject si existen
+  if (clientName || clientPhone) {
+    subject += ' - ';
+    if (clientName) subject += `Cliente: ${clientName}`;
+    if (clientName && clientPhone) subject += ' - ';
+    if (clientPhone) subject += `Cel: ${clientPhone}`;
+  }
+  
+  // Agregar observaciones al texto si existen
+  if (observations) {
+    text += `\n\nObservaciones: ${observations}`;
+  }
+
   const mailOptions = {
     from: "edgararc13@gmail.com",
     to: email,
     //cc: 'coop.mars@outlook.com', // destinatario en copia
     cc: ['coop.mars@outlook.com', 'rivero_ragde@hotmail.com', 'santanaadri@hotmail.com'],
-    subject: 'Tiendas MARS- Tu carrito de pedidos',
-    text: 'Buen dia adjunto encontrarás los productos de tu pedido, gracias por preferirnos, Tiendas MARS',
+    subject: subject,
+    text: text,
     attachments: [{
       filename: 'carrito.xlsx',
       content: excelBuffer,

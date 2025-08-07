@@ -5,7 +5,7 @@ const nodemailer = require('nodemailer');
 const XLSX = require('xlsx');
 
 router.post('/send-cart', async (req, res) => {
-  const { email, cartItems } = req.body;
+  const { email, clientName, clientPhone, observations, cartItems } = req.body;
 
   // Generar Excel
   const worksheet = XLSX.utils.json_to_sheet(cartItems);
@@ -22,11 +22,28 @@ router.post('/send-cart', async (req, res) => {
     },
   });
 
+  // Construir subject y text basado en los datos proporcionados
+  let subject = 'MARS- Tu carrito de pedidos';
+  let text = 'Adjunto encontrarás los productos de tu carrito';
+  
+  // Agregar nombre y teléfono al subject si existen
+  if (clientName || clientPhone) {
+    subject += ' - ';
+    if (clientName) subject += `Cliente: ${clientName}`;
+    if (clientName && clientPhone) subject += ' - ';
+    if (clientPhone) subject += `Tel: ${clientPhone}`;
+  }
+  
+  // Agregar observaciones al texto si existen
+  if (observations) {
+    text += `\n\nObservaciones: ${observations}`;
+  }
+
   const mailOptions = {
-    from: process.env.EMAIL_USER||"edgararc13@gmail.com",
+    from: process.env.EMAIL_USER || "edgararc13@gmail.com",
     to: email,
-    subject: 'Tu carrito de compras',
-    text: 'Adjunto encontrarás los productos de tu carrito',
+    subject: subject,
+    text: text,
     attachments: [{
       filename: 'carrito.xlsx',
       content: excelBuffer,

@@ -52,12 +52,11 @@ const saveToDatabase = async (products) => {
             //console.log(product)
             await pool.query(
                 `INSERT INTO productos (
-                    id, barra, sku, titulo, stock, precio_costo, 
+                    barra, sku, titulo, stock, precio_costo, 
                     precio_minorista, precio_especial, precio_mayorista, 
                     categoria, proveedor, ubicacion,estatus
                 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,$12)`,
                 [
-                    product.sku,
                     product.barra,
                     product.sku,
                     product.titulo,

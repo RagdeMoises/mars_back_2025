@@ -11,10 +11,10 @@ const config = {
   connectionTimeoutMillis: 5000,
 };
 
-console.log('Intentando conectar con configuración:', {
-  ...config,
-  password: config.password ? '***' : '(vacía)'
-});
+// console.log('Intentando conectar con configuración:', {
+//   ...config,
+//   password: config.password ? '***' : '(vacía)'
+// });
 
 const pool = new Pool(config);
 
@@ -54,7 +54,6 @@ const initializeDatabase = async () => {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS productos (
         id SERIAL PRIMARY KEY,
-        barra VARCHAR(255),
         sku VARCHAR(255),
         titulo VARCHAR(255),
         stock INTEGER,
@@ -72,7 +71,7 @@ const initializeDatabase = async () => {
 
     await pool.query(`
         CREATE INDEX IF NOT EXISTS idx_productos_search ON productos 
-        (titulo, sku, barra, categoria);
+        (titulo, sku, categoria);
     `);
     console.log('✅ Tabla "productos" verificada');
   } catch (err) {

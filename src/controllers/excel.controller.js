@@ -7,27 +7,70 @@ const express = require('express');
 const nodemailer = require('nodemailer');
 
 const readExcelFile = async (filePath) => {
-    //console.log(filePath)
     try {
         const file = xlsx.readFile(filePath);            
-        let data = [];
-        const temp = xlsx.utils.sheet_to_json(
+        
+        // Leer el archivo usando los encabezados reales de la primera fila
+        const rawData = xlsx.utils.sheet_to_json(
             file.Sheets[file.SheetNames[0]], {
-                header: ['barra', 'B', 'sku', 'id', 'titulo', 'F', 'stock', 'H', 'precio_costo', 'J', 
-                         'precio_minorista', 'L', 'precio_especial', 'N', 'precio_mayorista', 'P', 
-                         'Q', 'categoria', 'S', 'proveedor', 'U', 'V', 'W', 'X', 'Y', 'Z', 'AA', 
-                         'AB', 'AC', 'AD', 'AE', 'ubicacion', 'AG', 'AH', 'AI']
+                header: 0, // Usar la primera fila como encabezados
+                defval: "",
+                range: 0
             });
-        temp.forEach((res) => {  
-            console.log(res)          
-            data.push(res);
-        });
-        return data;
+
+        console.log('Encabezados detectados:', rawData.length > 0 ? Object.keys(rawData[0]) : []);
+        
+        // Mapear los datos a la estructura de la base de datos
+        const mappedData = rawData.map(row => {
+            return {
+                
+                sku: row['SKU'] || '',
+                titulo: row['Nombre'] || '',
+                stock: Number(row['Stock Disponible']) || Number(row['Stock']) || 0,
+                precio_costo: Number(row['Costo Interno']) || 0,
+                precio_minorista: Number(row['Precio Final']) || 0,
+                precio_especial: Number(row['Precio']) || 0, // Precio sin IVA
+                precio_mayorista: Number(row['Precio Mayorista']) || 0,
+                categoria: row['Rubro'],
+                proveedor: row['Proveedor'] || '',
+                ubicacion: row['Ubicacion'] ||'', // No veo esta columna en el ejemplo
+                estatus: row['etiqueta'] || row['Estado'] || '' // Usar etiqueta para estatus
+            };
+        }).filter(row => row.titulo && row.titulo.trim() !== '' && row.sku && row.sku !== '');
+
+        console.log('Primera fila mapeada:', mappedData[0]);
+        console.log('Total de registros procesados:', mappedData.length);
+        
+        return mappedData;
+        
     } catch (err) {
-        console.log(err);
+        console.log('Error al leer el archivo Excel:', err);
         throw err;
     }
 };
+
+// const readExcelFile = async (filePath) => {
+//     //console.log(filePath)
+//     try {
+//         const file = xlsx.readFile(filePath);            
+//         let data = [];
+//         const temp = xlsx.utils.sheet_to_json(
+//             file.Sheets[file.SheetNames[0]], {
+//                 header: ['barra', 'B', 'sku', 'id', 'titulo', 'F', 'stock', 'H', 'precio_costo', 'J', 
+//                          'precio_minorista', 'L', 'precio_especial', 'N', 'precio_mayorista', 'P', 
+//                          'Q', 'categoria', 'S', 'proveedor', 'U', 'V', 'W', 'X', 'Y', 'Z', 'AA', 
+//                          'AB', 'AC', 'AD', 'AE', 'ubicacion', 'AG', 'AH', 'AI']
+//             });
+//         temp.forEach((res) => {  
+//             console.log(res)          
+//             data.push(res);
+//         });
+//         return data;
+//     } catch (err) {
+//         console.log(err);
+//         throw err;
+//     }
+// };
 
 const getProducts = async (req, res) => {
     try {
@@ -49,15 +92,14 @@ const saveToDatabase = async (products) => {
         
         // Insertar productos en lote
         for (const product of products) {
-            //console.log(product)
+            console.log(product)
             await pool.query(
                 `INSERT INTO productos (
-                    barra, sku, titulo, stock, precio_costo, 
+                    sku, titulo, stock, precio_costo, 
                     precio_minorista, precio_especial, precio_mayorista, 
                     categoria, proveedor, ubicacion,estatus
-                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,$12)`,
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
                 [
-                    product.barra,
                     product.sku,
                     product.titulo,
                     product.stock,
@@ -115,7 +157,7 @@ const renderExcelForm = (req, res) => {
             const offset = (page - 1) * limit;
             
             // Construir la parte WHERE de la consulta
-            let whereConditions = ['(titulo ILIKE $1 OR sku ILIKE $1 OR barra ILIKE $1)'];
+            let whereConditions = ['(titulo ILIKE $1 OR sku ILIKE $1)'];
             const queryParams = [`%${search}%`];
             
             // Agregar filtro de categoría si existe

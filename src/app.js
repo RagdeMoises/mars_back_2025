@@ -18,7 +18,7 @@ app.set('view engine', 'ejs');
 
 const allowedOrigins = [
   'https://upload2025-production.up.railway.app',
-  'https://frontmayor2025-production.up.railway.app'
+  'https://frontmayor2025-production.up.railway.app' 
 ];
 
 app.use(cors({

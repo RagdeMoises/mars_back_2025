@@ -19,11 +19,10 @@ const readExcelFile = async (filePath) => {
             });
 
         console.log('Encabezados detectados:', rawData.length > 0 ? Object.keys(rawData[0]) : []);
-        
         // Mapear los datos a la estructura de la base de datos
+        console.log('Ejemplo de primera fila:', rawData);
         const mappedData = rawData.map(row => {
-            return {
-                
+            return {                
                 sku: row['SKU'] || '',
                 titulo: row['Nombre'] || '',
                 stock: Number(row['Stock Disponible']) || Number(row['Stock']) || 0,
@@ -34,7 +33,7 @@ const readExcelFile = async (filePath) => {
                 categoria: row['Rubro'],
                 proveedor: row['Proveedor'] || '',
                 ubicacion: row['Ubicacion'] ||'', // No veo esta columna en el ejemplo
-                etiqueta: row['etiqueta'] || '' // Usar etiqueta para estatus
+                etiqueta: row['etiqueta']  || 1// Usar etiqueta para estatus
             };
         }).filter(row => row.titulo && row.titulo.trim() !== '' && row.sku && row.sku !== '');
 
@@ -92,12 +91,12 @@ const saveToDatabase = async (products) => {
         
         // Insertar productos en lote
         for (const product of products) {
-            console.log(product)
+            //console.log(product)
             await pool.query(
                 `INSERT INTO productos (
                     sku, titulo, stock, precio_costo, 
                     precio_minorista, precio_especial, precio_mayorista, 
-                    categoria, proveedor, ubicacion,estatus
+                    categoria, proveedor, ubicacion, estatus
                 ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
                 [
                     product.sku,
@@ -193,7 +192,7 @@ const renderExcelForm = (req, res) => {
                 ORDER BY ${getSortClause(sortBy)}
                 LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}
             `;
-            console.log(query)
+            //console.log(query)
             
             let countQuery = `
                 SELECT COUNT(*) FROM productos

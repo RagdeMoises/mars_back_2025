@@ -34,7 +34,7 @@ const readExcelFile = async (filePath) => {
                 categoria: row['Rubro'],
                 proveedor: row['Proveedor'] || '',
                 ubicacion: row['Ubicacion'] ||'', // No veo esta columna en el ejemplo
-                estatus: row['etiqueta'] || row['Estado'] || '' // Usar etiqueta para estatus
+                etiqueta: row['etiqueta'] || row['Estado'] || '' // Usar etiqueta para estatus
             };
         }).filter(row => row.titulo && row.titulo.trim() !== '' && row.sku && row.sku !== '');
 
@@ -110,7 +110,7 @@ const saveToDatabase = async (products) => {
                     product.categoria,
                     product.proveedor,
                     product.ubicacion,
-                    product.AD
+                    product.etiqueta
                 ]
             );
         }
